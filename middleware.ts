@@ -1,48 +1,26 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { auth } from "@/auth";
+import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_ROUTES = ["/admin"];
-const AUTH_ROUTES = ["/login", "/register"];
+export default auth((req: NextRequest) => {
+  const { pathname } = req.nextUrl;
+  const session = (req as any).auth;
 
-function isAdminRoute(pathname: string) {
-  return ADMIN_ROUTES.some((route) => pathname.startsWith(route));
-}
-
-function isAuthRoute(pathname: string) {
-  return AUTH_ROUTES.includes(pathname);
-}
-
-function redirectToLogin(request: NextRequest) {
-  const response = NextResponse.redirect(new URL("/login", request.url));
-  response.cookies.delete("admin_token");
-  return response;
-}
-
-function redirectToDashboard(request: NextRequest) {
-  return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-}
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const token = request.cookies.get("admin_token")?.value;
-
-  if (isAdminRoute(pathname)) {
-    if (!token) {
-      return redirectToLogin(request);
-    }
-    return NextResponse.next();
+  // Redirect unauthenticated users away from dashboard
+  if (!session && pathname.startsWith("/dashboard")) {
+    const url = new URL("/login", req.url);
+    return NextResponse.redirect(url);
   }
 
-  if (isAuthRoute(pathname)) {
-    if (token) {
-      return redirectToDashboard(request);
-    }
-    return NextResponse.next();
+  // Redirect authenticated users away from auth pages
+  if (session && (pathname === "/login" || pathname === "/register")) {
+    const url = new URL("/dashboard", req.url);
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ["/admin/:path*", "/login", "/register"],
+  matcher: ["/dashboard/:path*", "/login", "/register"],
 };

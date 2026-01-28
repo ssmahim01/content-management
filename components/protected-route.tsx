@@ -1,33 +1,33 @@
 'use client'
 
-import { useAuth } from '@/lib/auth-context'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, ReactNode } from 'react'
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { data: session, status } = useSession()
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (status === 'unauthenticated') {
       router.push('/login')
     }
-  }, [isLoading, isAuthenticated, router])
+  }, [status, router])
 
-  if (isLoading) {
+  if (status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="mb-4 flex justify-center">
-            <div className="w-8 h-8 bg-primary rounded-full animate-spin"></div>
+      <div className='flex items-center justify-center min-h-screen bg-linear-to-br from-indigo-50 to-blue-50 dark:from-slate-950 dark:to-slate-900'>
+        <div className='text-center'>
+          <div className='mb-4 flex justify-center'>
+            <div className='w-8 h-8 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-spin'></div>
           </div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className='text-slate-600 dark:text-slate-400'>Loading dashboard...</p>
         </div>
       </div>
     )
   }
 
-  if (!isAuthenticated) {
+  if (!session) {
     return null
   }
 
