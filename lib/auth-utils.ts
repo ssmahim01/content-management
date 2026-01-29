@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-// Auth utilities for managing localStorage-based authentication
-// This can be easily replaced with backend API calls later
-
 export interface AuthUser {
   id: string
   email: string
@@ -28,7 +25,7 @@ export function initializeAuth() {
       {
         id: 'admin-001',
         email: 'admin@portfolio.com',
-        password: 'admin123', // In production, this would be hashed
+        password: 'admin123',
         name: 'Admin',
       },
     ]
@@ -49,7 +46,7 @@ export function registerUser(email: string, password: string, name: string): boo
   const newUser = {
     id: `user-${Date.now()}`,
     email,
-    password, // In production, hash this
+    password,
     name,
   }
 

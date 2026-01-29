@@ -1,46 +1,45 @@
-"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client"
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { AuthUser, getCurrentUser, initializeAuth } from "./auth-utils";
+import React, { createContext, useContext } from "react"
+import { useSession } from "next-auth/react"
 
 interface AuthContextType {
-  user: AuthUser | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
+  user: {
+    id: string
+    name?: string | null
+    email?: string | null
+    role?: string
+  } | null
+  isAuthenticated: boolean
+  isLoading: boolean
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: session, status } = useSession()
 
-  useEffect(() => {
-    initializeAuth();
-    const currentUser = getCurrentUser();
-    setTimeout(() => {
-      setUser(currentUser);
-      setIsLoading(false);
-    }, 100);
-  }, []);
+  const value: AuthContextType = {
+    user: session?.user
+      ? {
+          id: (session.user as any).id,
+          name: session.user.name,
+          email: session.user.email,
+          role: (session.user as any).role,
+        }
+      : null,
+    isAuthenticated: status === "authenticated",
+    isLoading: status === "loading",
+  }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        isAuthenticated: !!user,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within AuthProvider");
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider")
   }
-  return context;
+  return context
 }

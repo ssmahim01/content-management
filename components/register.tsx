@@ -149,7 +149,7 @@ export default function RegisterForm() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium h-10 gap-2"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 hover:cursor-pointer hover:scale-105 transition-transform transform ease-in-out duration-500 text-white font-medium h-10 gap-2"
             >
               <UserPlus className="w-4 h-4" />
               {isLoading ? "Creating account..." : "Create Account"}
